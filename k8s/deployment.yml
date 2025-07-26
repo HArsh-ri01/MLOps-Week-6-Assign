@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: iris-api
-        image: us-central1-docker.pkg.dev/civic-nation-461607-p6/my_repo/iris-api:latest
+        image: us-central1-docker.pkg.dev/civic-nation-461607-p6/my-repo/iris-api:latest
         ports:
         - containerPort: 8200
 
