@@ -20,7 +20,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install cml
 
       - name: Authenticate with GCP
         env:
@@ -42,11 +41,4 @@ jobs:
           gcloud container clusters get-credentials demo-gke-iris-cluster --region=us-central1
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
-
-      - name: Comment on PR (optional)
-        env:
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "## ✅ Iris API deployed to GKE :rocket:" > report.md
-          cml comment report.md
 
