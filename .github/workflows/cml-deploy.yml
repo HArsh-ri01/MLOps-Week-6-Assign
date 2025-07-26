@@ -39,6 +39,6 @@ jobs:
       - name: Deploy to GKE
         run: |
           gcloud container clusters get-credentials gke-iris-cluster --region=us-central1
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/deployment.yml
+          kubectl apply -f k8s/service.yml
 
