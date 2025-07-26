@@ -1,0 +1,52 @@
+name: CML Iris CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install cml
+
+      - name: Authenticate with GCP
+        env:
+          GCP_KEY: ${{ secrets.GCP_JSON_KEY }}
+        run: |
+          echo "$GCP_KEY" | base64 -d > gcp-key.json
+          gcloud auth activate-service-account --key-file=gcp-key.json
+          gcloud config set project civic-nation-461607-p6
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t iris-api .
+          docker tag iris-api us-central1-docker.pkg.dev/civic-nation-461607-p6/my_repo/iris-api:latest
+          docker push us-central1-docker.pkg.dev/civic-nation-461607-p6/my_repo/iris-api:latest
+
+      - name: Deploy to GKE
+        run: |
+          gcloud container clusters get-credentials demo-gke-iris-cluster --region=us-central1
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+      - name: Comment on PR (optional)
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## ✅ Iris API deployed to GKE :rocket:" > report.md
+          cml comment report.md
+
